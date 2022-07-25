@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="file" onchange="ddd(this)">
+    
+    <script>
+        function ddd(e) {
+            console.time("6")
+            const blob = e.files[0]
+            let reader = new FileReader();
+            reader.readAsArrayBuffer(blob);
+            reader.onload = () => {
+                const unit16 = Array.prototype.map.call(new Uint8Array(reader.result), x => ('00' + x.toString(16)).slice(-2)).join(' ');
+                // https://cloud.tencent.com/developer/article/1427939
+                // determine if the image is a jpeg
+                if (unit16.substr(0, 5) === "ff d8" && unit16.substr(unit16.length - 5, 5) === "ff d9") {
+                    const headerLength = unit16.indexOf(" ff c0 ");
+                    const header = unit16.slice(0, headerLength);
+                    // determine if the image is in EXIF format
+                    const index = header.indexOf(" ff e1 ");
+                    if (index !== -1 && header.substr(index + 13, 11) === "45 78 69 66") { console.log("yes"); console.timeEnd("6")}
+                    else { console.log("no"); }
+                } else {
+                    console.log("no");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
